@@ -38,9 +38,3 @@ validator_derive = "0.8.0"
 
 [dev-dependencies]
 actix-http-test = "0.2.0"
-
-[features]
-cockroach = []
-postgres = []
-sqlite = []
-default = ["postgres"]

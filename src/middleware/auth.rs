@@ -52,11 +52,11 @@ where
         let is_logged_in = private_claim.is_ok();
         let unauthorized = !is_logged_in && req.path() != "/api/v1/auth/login";
 
-        if unauthorized {
-            return Box::pin(async move {    
-                Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
-            })
-        }
+        // if unauthorized {
+        //     return Box::pin(async move {
+        //         Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
+        //     })
+        // }
 
         let fut = self.service.call(req);
 
