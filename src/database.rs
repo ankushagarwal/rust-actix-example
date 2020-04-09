@@ -4,7 +4,6 @@ use actix_web::web;
 use diesel::{
     pg::PgConnection,
     r2d2::{ConnectionManager, PoolError},
-    sqlite::SqliteConnection,
     Connection,
 };
 

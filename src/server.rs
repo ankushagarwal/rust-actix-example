@@ -1,7 +1,6 @@
 //! Spin up a HTTPServer
 
 use crate::auth::get_identity_service;
-use crate::cache::add_cache;
 use crate::config::CONFIG;
 use crate::database::add_pool;
 use crate::routes::routes;
@@ -22,7 +21,6 @@ pub async fn server() -> std::io::Result<()> {
     let mut listenfd = ListenFd::from_env();
     let mut server = HttpServer::new(move || {
         App::new()
-            .configure(add_cache)
             .wrap(Cors::new().supports_credentials().finish())
             .wrap(Logger::default())
             .wrap(get_identity_service())
