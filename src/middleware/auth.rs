@@ -2,10 +2,7 @@ use crate::auth::{decode_jwt, PrivateClaim};
 use crate::errors::ApiError;
 use actix_identity::RequestIdentity;
 use actix_service::{Service, Transform};
-use actix_web::{
-    dev::{ServiceRequest, ServiceResponse},
-    Error,
-};
+use actix_web::{dev::{ServiceRequest, ServiceResponse}, Error, HttpResponse};
 use futures::{Future, future::{ok, Ready}};
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -50,13 +47,13 @@ where
         let identity = RequestIdentity::get_identity(&req).unwrap_or("".into());
         let private_claim: Result<PrivateClaim, ApiError> = decode_jwt(&identity);
         let is_logged_in = private_claim.is_ok();
-        let _unauthorized = !is_logged_in && req.path() != "/api/v1/auth/login";
+        let unauthorized = !is_logged_in && req.path() != "/api/v1/auth/login";
 
-        // if unauthorized {
-        //     return Box::pin(async move {
-        //         Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
-        //     })
-        // }
+        if unauthorized {
+            return Box::pin(async move {
+                Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
+            })
+        }
 
         let fut = self.service.call(req);
 

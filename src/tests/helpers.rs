@@ -1,7 +1,6 @@
 #[cfg(test)]
 pub mod tests {
     use crate::auth::get_identity_service;
-    use crate::cache::add_cache;
     use crate::config::CONFIG;
     use crate::database::{add_pool, init_pool, Pool};
     use crate::handlers::auth::LoginRequest;
@@ -9,8 +8,8 @@ pub mod tests {
     use crate::state::{new_state, AppState};
     use actix_web::dev::ServiceResponse;
     use actix_web::{test, web::Data, App};
-    use diesel::mysql::MysqlConnection;
     use serde::Serialize;
+    use diesel::PgConnection;
 
     /// Helper for HTTP GET integration tests
     pub async fn test_get(route: &str) -> ServiceResponse {
@@ -21,7 +20,6 @@ pub mod tests {
 
         let mut app = test::init_service(
             App::new()
-                .configure(add_cache)
                 .app_data(app_state())
                 .wrap(get_identity_service())
                 .configure(add_pool)
@@ -53,7 +51,6 @@ pub mod tests {
     pub async fn test_post<T: Serialize>(route: &str, params: T) -> ServiceResponse {
         let mut app = test::init_service(
             App::new()
-                .configure(add_cache)
                 .app_data(app_state())
                 .wrap(get_identity_service())
                 .configure(add_pool)
@@ -100,12 +97,12 @@ pub mod tests {
     }
 
     /// Returns a r2d2 Pooled Connection to be used in tests
-    pub fn get_pool() -> Pool<MysqlConnection> {
-        init_pool::<MysqlConnection>(CONFIG.clone()).unwrap()
+    pub fn get_pool() -> Pool<PgConnection> {
+        init_pool::<PgConnection>(CONFIG.clone()).unwrap()
     }
 
     /// Returns a r2d2 Pooled Connection wrappedn in Actix Application Data
-    pub fn get_data_pool() -> Data<Pool<MysqlConnection>> {
+    pub fn get_data_pool() -> Data<Pool<PgConnection>> {
         Data::new(get_pool())
     }
 

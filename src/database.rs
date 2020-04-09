@@ -15,7 +15,7 @@ pub enum DatabaseConnection {
 }
 
 pub type Pool<T> = r2d2::Pool<ConnectionManager<T>>;
-pub type PostgresPool = Pool<PgConnection>;
+    pub type PostgresPool = Pool<PgConnection>;
 
 pub type PoolType = PostgresPool;
 
