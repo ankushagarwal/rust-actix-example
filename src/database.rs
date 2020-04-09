@@ -2,7 +2,6 @@
 use crate::config::{Config, CONFIG};
 use actix_web::web;
 use diesel::{
-    mysql::MysqlConnection,
     pg::PgConnection,
     r2d2::{ConnectionManager, PoolError},
     sqlite::SqliteConnection,
@@ -14,22 +13,17 @@ use diesel::{
 #[serde(field_identifier, rename_all = "lowercase")]
 pub enum DatabaseConnection {
     Cockroach,
-    Mysql,
     Postgres,
     Sqlite,
 }
 
 pub type Pool<T> = r2d2::Pool<ConnectionManager<T>>;
 pub type CockroachPool = Pool<PgConnection>;
-pub type MysqlPool = Pool<MysqlConnection>;
 pub type PostgresPool = Pool<PgConnection>;
 pub type SqlitePool = Pool<SqliteConnection>;
 
 #[cfg(feature = "cockraoch")]
 pub type PoolType = CockroachPool;
-
-#[cfg(feature = "mysql")]
-pub type PoolType = MysqlPool;
 
 #[cfg(feature = "postgres")]
 pub type PoolType = PostgresPool;
@@ -40,7 +34,6 @@ pub type PoolType = SqlitePool;
 #[derive(Clone)]
 pub enum InferPool {
     Cockroach(CockroachPool),
-    Mysql(MysqlPool),
     Postgres(PostgresPool),
     Sqlite(SqlitePool),
 }
@@ -51,7 +44,6 @@ impl InferPool {
             DatabaseConnection::Cockroach => {
                 init_pool::<PgConnection>(config).map(InferPool::Cockroach)
             }
-            DatabaseConnection::Mysql => init_pool::<MysqlConnection>(config).map(InferPool::Mysql),
             DatabaseConnection::Postgres => {
                 init_pool::<PgConnection>(config).map(InferPool::Postgres)
             }
@@ -75,7 +67,6 @@ pub fn add_pool(cfg: &mut web::ServiceConfig) {
     let pool = InferPool::init_pool(CONFIG.clone()).expect("Failed to create connection pool");
     match pool {
         InferPool::Cockroach(cockroach_pool) => cfg.data(cockroach_pool),
-        InferPool::Mysql(mysql_pool) => cfg.data(mysql_pool),
         InferPool::Postgres(postgres_pool) => cfg.data(postgres_pool),
         InferPool::Sqlite(sqlite_pool) => cfg.data(sqlite_pool),
     };
